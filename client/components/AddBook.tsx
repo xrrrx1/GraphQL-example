@@ -4,10 +4,6 @@ import { graphql, compose } from "react-apollo";
 
 import { getAuthorsQuery, addBookMutation, getBooksQuery } from "../queries/queries";
 
-interface Props {
-  addBookMutation(argument: object): object;
-}
-
 const StyledForm = styled.form`
   background: #fff;
   padding: 20px;
@@ -38,72 +34,73 @@ const StyledForm = styled.form`
     left: 10px;
   }
 `;
+
 const StyledField = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 10px;
 `;
 
-class AddBook extends React.Component<Props> {
-  state: {
-    name: "";
-    genre: "";
-    authorId: "";
+interface BookMutation {
+  addBookMutation(args: object): object;
+}
+
+const AddBook: React.FunctionComponent<BookMutation> = props => {
+  const [name, changeName] = useState("");
+  const [genre, changeGenre] = useState("");
+  const [authorId, changeAuthorId] = useState("");
+
+  const displayAuthors = bookProps => {
+    const data = bookProps.getAuthorsQuery;
+    if (data.loading) {
+      return <option disabled>Loading authors...</option>;
+    } else if (data.error) {
+      return <h1>ERROR</h1>;
+    } else {
+      return data.authors.map(author => {
+        return (
+          <option key={author.id} value={author.id}>
+            {author.name}
+          </option>
+        );
+      });
+    }
   };
 
-  render() {
-    return (
-      <React.Fragment>
-        <StyledForm onSubmit={this.submitForm}>
-          <StyledField>
-            <label>Book name:</label>
-            <input type="text" onChange={e => this.setState({ name: e.target.value })} />
-          </StyledField>
-          <StyledField>
-            <label>Genre:</label>
-            <input type="text" onChange={e => this.setState({ genre: e.target.value })} />
-          </StyledField>
-          <StyledField>
-            <label>Author:</label>
-            <select onChange={e => this.setState({ authorId: e.target.value })}>
-              <option>Select author</option>
-              {displayAuthors(this.props)}
-            </select>
-          </StyledField>
-          <button>+</button>
-        </StyledForm>
-      </React.Fragment>
-    );
-  }
-
-  submitForm = e => {
+  const submitForm = e => {
     e.preventDefault();
-    this.props.addBookMutation({
+    props.addBookMutation({
       variables: {
-        name: this.state.name,
-        genre: this.state.genre,
-        authorId: this.state.authorId,
+        name: name,
+        genre: genre,
+        authorId: authorId,
       },
       refetchQueries: [{ query: getBooksQuery }],
     });
   };
-}
 
-const displayAuthors = props => {
-  const data = props.getAuthorsQuery;
-  if (data.loading) {
-    return <option disabled>Loading authors...</option>;
-  } else if (data.error) {
-    return <h1>ERROR</h1>;
-  } else {
-    return data.authors.map(author => {
-      return (
-        <option key={author.id} value={author.id}>
-          {author.name}
-        </option>
-      );
-    });
-  }
+  return (
+    <React.Fragment>
+      <StyledForm onSubmit={submitForm}>
+        <StyledField>
+          <label>Book name:</label>
+          <input type="text" onChange={e => changeName(e.target.value)} />
+        </StyledField>
+        <StyledField>
+          <label>Genre:</label>
+          <input type="text" onChange={e => changeGenre(e.target.value)} />
+        </StyledField>
+        <StyledField>
+          <label>Author:</label>
+          <select onChange={e => changeAuthorId(e.target.value)}>
+            <option>Select author</option>
+            {displayAuthors(props)}
+          </select>
+        </StyledField>
+        <button>+</button>
+      </StyledForm>
+    </React.Fragment>
+  );
 };
 
 export default compose(

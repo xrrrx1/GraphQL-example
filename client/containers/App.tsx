@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useContext, useEffect } from "react";
 import ApolloClient from "apollo-boost";
 import fetch from "isomorphic-fetch";
 import { InMemoryCache } from "apollo-cache-inmemory";
@@ -8,6 +8,7 @@ import styled from "styled-components";
 import Title from "../components/Title";
 import BookList from "../components/BookList";
 import AddBook from "../components/AddBook";
+import { AppTitleContext } from "../context/context";
 
 const StyledApp = styled.div`
   h1 {
@@ -25,13 +26,21 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-export const App: React.FunctionComponent = () => (
-  <ApolloProvider client={client}>
-    <StyledApp>
-      <Title titleColor="#444" />
+export const App: React.FunctionComponent = () => {
+  const appTitle = useContext(AppTitleContext);
 
-      <BookList />
-      <AddBook />
-    </StyledApp>
-  </ApolloProvider>
-);
+  useEffect(() => {
+    document.title = appTitle;
+  });
+
+  return (
+    <ApolloProvider client={client}>
+      <StyledApp>
+        <Title />
+
+        <BookList />
+        <AddBook />
+      </StyledApp>
+    </ApolloProvider>
+  );
+};

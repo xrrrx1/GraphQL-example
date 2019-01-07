@@ -1,6 +1,6 @@
 import * as React from "react";
 import { App } from "../containers/App";
-import { createGlobalStyle, ThemeProvider } from "styled-components";
+import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
   body {
